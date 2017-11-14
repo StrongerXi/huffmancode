@@ -1,32 +1,23 @@
-from huffmancode import HuffmanEncoder, HuffmanDecoder
+from huffmanencoder import HuffmanEncoder
+from huffmandecoder import HuffmanDecoder
 
 
-
-text = open("textfile","r")
-huffmanbinaryfile = open("huffmancode","w")
+text = open("files/textfile","r")
+huffmanbinaryfile = open("files/readable_binary_huffman","w")
 
 message = text.read()
-#print(message)
-#print("quit")
-
 
 
 huffmanencode = HuffmanEncoder(message)
-huffmanencode.write_encoded_message_to_path("binary")
-
-huffmandecode = HuffmanDecoder(huffmanencode.root_node)
-huffmandecode.decode_and_write_to_path("binary","decoded")
+huffmanencode.write_encoded_message_to_path("files/encoded_huffman")
+print("encoding finished")
 
 huffmanbinaryfile.write(huffmanencode.encoded_binary_message)
 
-#print(huffman.get_encoded_message())
-#print(huffman.get_encoded_message().__len__())
+huffmandecode = HuffmanDecoder(None)
 
-
-#print(huffman.char_to_code_dict)
-
-#codefile.write(huffman.get_encoded_message())
-
+huffmandecode.decode_and_write_to_path("files/encoded_huffman","files/decoded")
+print("decoding finished")
 
 text.close()
 huffmanbinaryfile.close()
