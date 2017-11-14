@@ -1,4 +1,4 @@
-from huffmancode import HuffmanCode
+from huffmancode import HuffmanEncoder, HuffmanDecoder
 
 
 
@@ -11,11 +11,13 @@ message = text.read()
 
 
 
-huffman = HuffmanCode(message)
-huffman.write_encoded_message_to_path("binary")
-huffman.decode_and_write_to_path("binary","decoded")
+huffmanencode = HuffmanEncoder(message)
+huffmanencode.write_encoded_message_to_path("binary")
 
-huffmanbinaryfile.write(huffman.encoded_binary_message)
+huffmandecode = HuffmanDecoder(huffmanencode.root_node)
+huffmandecode.decode_and_write_to_path("binary","decoded")
+
+huffmanbinaryfile.write(huffmanencode.encoded_binary_message)
 
 #print(huffman.get_encoded_message())
 #print(huffman.get_encoded_message().__len__())
