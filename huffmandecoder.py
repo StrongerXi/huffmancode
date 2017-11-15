@@ -18,6 +18,7 @@ class HuffmanDecoder:
         key_to_decode = open(path_to_decode + settings.KEY_FILE_SUFFIX, "r")
 
 
+
         encoded_mes_in_bits = ""
 
         key = key_to_decode.read()
@@ -40,7 +41,8 @@ class HuffmanDecoder:
         if padded_var:
             encoded_mes_in_bits += bin(byte_list[-2])[3:]
         # The first padded 1 bit is ignored, otherwise it disrupts the information being encrypted
-        # print(encoded_mes_in_bits)
+
+        #print("encoded_bits_read: ", encoded_mes_in_bits)
 
         print("decoding...")
         decoded_message = self.decode(encoded_mes_in_bits)
@@ -105,11 +107,13 @@ class HuffmanDecoder:
         decoded_message = ""
         index_boundary = len(encoded_message)
 
-        while (index < index_boundary - 1):
+        while (index < index_boundary):
             print("decoding ", index, " out of ", index_boundary)
+
 
             tuple_of_sn = decode_one_char(self.root_node, index)
             decoded_message += tuple_of_sn[0]
+            #print("decoded char: ", decoded_message)
             index = tuple_of_sn[1]
 
         return decoded_message

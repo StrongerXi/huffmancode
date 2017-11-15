@@ -59,6 +59,9 @@ class HuffmanEncoder:
 
         binary_code = self.encoded_binary_message
 
+        #print("bits encoded: ", binary_code)
+        #print("map: ", self.char_to_code_dict)
+
 
         num_of_bits = len(binary_code)
 
@@ -66,18 +69,21 @@ class HuffmanEncoder:
         left_over_bits = num_of_bits % 8
         list_of_base10_code = [None] * (number_of_full_bytes + 1)
 
+        print(binary_code)
+
 
         for index in range(0,num_of_bits,8):
 
             print("encoding: ", index, " bits out of ", num_of_bits)
-
-
+            print(index)
             list_of_base10_code[index//8] = (int(binary_code[index:index+8],2))
 
         if left_over_bits > 0:
             list_of_base10_code[-1] = int("1" + binary_code[num_of_bits - left_over_bits : ],2) # A 1 is padded at the front to prevent loss of any 0's on the left
             list_of_base10_code.append(1) # Meaning it's padded
+
         elif left_over_bits == 0:
+            list_of_base10_code.pop() # The extra None element generated for potential leftover bits is not required if there's no leftover bits
             list_of_base10_code.append(0)
         else:
             raise Exception("Leftover bit error!!! : ", left_over_bits)
@@ -88,6 +94,8 @@ class HuffmanEncoder:
 
         header_key_message = self.decoding_key_message
         key_file.write(header_key_message)
+
+        print(list_of_base10_code)
 
         encoded_file.write(bytes(list_of_base10_code))
         key_file.close()
