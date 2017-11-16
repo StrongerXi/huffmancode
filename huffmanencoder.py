@@ -10,22 +10,27 @@ class HuffmanEncoder:
 
         self.__secretMessage = message
 
-        self.frequency_dict = self.get_frequency_dict(message)
+        if message:
 
-        self.ordered_lon = self.get_ordered_lon(self.frequency_dict)
-        print("nodes generated")
+            self.frequency_dict = self.get_frequency_dict(message)
 
-        self.root_node = self.get_root_node(self.ordered_lon)
-        print("node tree generated")
+            self.ordered_lon = self.get_ordered_lon(self.frequency_dict)
+            print("nodes generated")
 
-        self.char_to_code_dict = self.generate_encoding_map(self.root_node)
-        print("encoding map generated")
+            self.root_node = self.get_root_node(self.ordered_lon)
+            print("node tree generated")
 
-        self.generate_decoding_key_message()
-        print("decoding key message generated")
+            self.char_to_code_dict = self.generate_encoding_map(self.root_node)
+            print("encoding map generated")
 
-        self.encode_to_binary()
-        print("binary code generated")
+            self.generate_decoding_key_message()
+            print("decoding key message generated")
+
+            self.encode_to_binary()
+            print("binary code generated")
+
+        else:
+            raise Exception("No input message. Cannot compress an empty file!!!")
 
 
 
@@ -54,7 +59,6 @@ class HuffmanEncoder:
     # at given path in encoded_huffman form.
     def write_encoded_message_to_path(self,path_to_write):
 
-        key_file = open(path_to_write + settings.KEY_FILE_SUFFIX, "w")
         encoded_file = open(path_to_write,"wb")
 
         binary_code = self.encoded_binary_message
@@ -62,20 +66,17 @@ class HuffmanEncoder:
         #print("bits encoded: ", binary_code)
         #print("map: ", self.char_to_code_dict)
 
-
         num_of_bits = len(binary_code)
 
         number_of_full_bytes = num_of_bits // 8
         left_over_bits = num_of_bits % 8
         list_of_base10_code = [None] * (number_of_full_bytes + 1)
 
-        print(binary_code)
-
 
         for index in range(0,num_of_bits,8):
 
             print("encoding: ", index, " bits out of ", num_of_bits)
-            print(index)
+            #print(index)
             list_of_base10_code[index//8] = (int(binary_code[index:index+8],2))
 
         if left_over_bits > 0:
@@ -93,12 +94,18 @@ class HuffmanEncoder:
         # Therefore, they must be padded back when converting byte to 8-bit bitstring
 
         header_key_message = self.decoding_key_message
-        key_file.write(header_key_message)
 
-        print(list_of_base10_code)
+        #print("original base10 code: ",list_of_base10_code)
 
-        encoded_file.write(bytes(list_of_base10_code))
-        key_file.close()
+        header_message_length = str(len(header_key_message.encode())) + "\n" # "\n" character serves as a EOF for reading key_length
+
+        header = (header_message_length + header_key_message).encode()
+
+        #print("key header: ", header)
+
+        #print(list_of_base10_code)
+
+        encoded_file.write(header + bytes(list_of_base10_code))
         encoded_file.close()
 
 
@@ -187,6 +194,7 @@ class HuffmanEncoder:
 
             HuffmanEncoder.insert_node(lon, combined_node)
 
+
         # Finally return the single root node (it implicitly contains the entire tree of nodes)
         return lon[0]
     
@@ -200,7 +208,6 @@ class HuffmanEncoder:
     def generate_encoding_map(root):
 
         encoding_dictionary = {}
-
         # Node Code -> Void
         # The work-horse of generate_encoding_map function
         # it uses Code as an accumulator to code each node
@@ -215,7 +222,12 @@ class HuffmanEncoder:
                 generate_dict(root.left, code + "0")
                 generate_dict(root.right, code + "1")
 
-        generate_dict(root,"")
+        # If there's only a single node, encode the node as either 0 or 1.
+
+        if root.char:
+            encoding_dictionary[root.char] = "1"
+        else:
+            generate_dict(root,"")
 
         return encoding_dictionary
 

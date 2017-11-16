@@ -10,6 +10,8 @@ message = text.read()
 
 huffmanencode = HuffmanEncoder(message)
 huffmanencode.write_encoded_message_to_path("files/encoded_huffman")
+#huffmanencode.write_encoded_message_to_path("files/file_to_decode")
+
 print("encoding finished")
 
 huffmanbinaryfile.write(huffmanencode.encoded_binary_message)
@@ -17,6 +19,8 @@ huffmanbinaryfile.write(huffmanencode.encoded_binary_message)
 huffmandecode = HuffmanDecoder(None)
 
 huffmandecode.decode_and_write_to_path("files/encoded_huffman","files/decoded")
+#huffmandecode.decode_and_write_to_path("files/file_to_decode","files/decoded")
+
 print("decoding finished")
 
 text.close()

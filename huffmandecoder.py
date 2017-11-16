@@ -15,16 +15,25 @@ class HuffmanDecoder:
 
         file_to_decode = open(path_to_decode ,"rb")
         file_to_write  = open(path_to_write ,"w")
-        key_to_decode = open(path_to_decode + settings.KEY_FILE_SUFFIX, "r")
 
 
 
         encoded_mes_in_bits = ""
 
-        key = key_to_decode.read()
-        self.generate_node_tree(key[1:] ,key[0:1])
+        key_length = file_to_decode.readline().decode()
+        key_length = int( key_length[:len(key_length)-1]) # This eliminates the '\n' character at the end which helps identify end of the number to read
+
+        initial_identifier = file_to_decode.read(1).decode()
+
+        key_for_tree_construction = file_to_decode.read(key_length-1).decode() # key_length-1 because initial identifier is already read.
+
+        #print("key message: ", key_for_tree_construction)
+
+        self.generate_node_tree(key_for_tree_construction ,initial_identifier)
 
         byte_list= list(file_to_decode.read())
+
+        #print(byte_list)
 
         padded_var = byte_list[-1] == 1
 
@@ -34,6 +43,7 @@ class HuffmanDecoder:
             full_byte_upperbound = len( byte_list) - 1 # If all bytes are perfectly fit, only the padded_var is discarded
 
         for index in range(0,full_byte_upperbound):
+            print("converting ", index, " bytes out of ", full_byte_upperbound)
             bitstring = HuffmanDecoder.int_to_8bitstring(byte_list[index])
             encoded_mes_in_bits += bitstring
 
@@ -51,8 +61,6 @@ class HuffmanDecoder:
 
         file_to_write.close()
         file_to_decode.close()
-        key_to_decode.close()
-
 
     @staticmethod
     # Int -> String
@@ -87,6 +95,13 @@ class HuffmanDecoder:
 
         lobits = encoded_message
 
+        # If root node contains an actual character, this means encrypted message only contains that character since no
+        # node that contains character could connect to further nodes
+        # In this trivial case, return the same number of the character as there are digits in encoded_message immediately.
+        if self.root_node.char:
+            return self.root_node.char * len(encoded_message)
+
+
         # Node N -> Tuple(String,N)
         # Traversing through the Node based on the given bit_index
         # Return a tuple of current node's character and current bit_index
@@ -97,11 +112,12 @@ class HuffmanDecoder:
                 return (node.char, bit_index)
 
             else:
+
                 current_bit = lobits[bit_index]
                 if current_bit == "0":
-                    return decode_one_char(node.left, bit_index + 1)
+                    return decode_one_char(node.left, bit_index+1)
                 else:
-                    return decode_one_char(node.right, bit_index + 1)
+                    return decode_one_char(node.right, bit_index+1)
 
         index = 0
         decoded_message = ""
@@ -110,11 +126,12 @@ class HuffmanDecoder:
         while (index < index_boundary):
             print("decoding ", index, " out of ", index_boundary)
 
-
             tuple_of_sn = decode_one_char(self.root_node, index)
             decoded_message += tuple_of_sn[0]
             #print("decoded char: ", decoded_message)
+
             index = tuple_of_sn[1]
+            #print("index: ", index)
 
         return decoded_message
 
