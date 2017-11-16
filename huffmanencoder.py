@@ -1,5 +1,4 @@
 
-import settings
 from huffmannode import Node
 
 

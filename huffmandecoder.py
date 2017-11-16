@@ -1,5 +1,4 @@
 from huffmannode import Node
-import settings
 
 class HuffmanDecoder:
 
