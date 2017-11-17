@@ -1,4 +1,5 @@
 from huffmannode import Node
+from collections import deque
 
 class HuffmanDecoder:
 
@@ -17,7 +18,7 @@ class HuffmanDecoder:
 
 
 
-        encoded_mes_in_bits = ""
+        encoded_mes_in_bits = []
 
         key_length = file_to_decode.readline().decode()
         key_length = int( key_length[:len(key_length)-1]) # This eliminates the '\n' character at the end which helps identify end of the number to read
@@ -32,7 +33,7 @@ class HuffmanDecoder:
 
         byte_list= list(file_to_decode.read())
 
-        #print(byte_list)
+        #print("received base 10 code", byte_list)
 
         padded_var = byte_list[-1] == 1
 
@@ -42,13 +43,17 @@ class HuffmanDecoder:
             full_byte_upperbound = len( byte_list) - 1 # If all bytes are perfectly fit, only the padded_var is discarded
 
         for index in range(0,full_byte_upperbound):
-            print("converting ", index, " bytes out of ", full_byte_upperbound)
+            #print("converting ", index, " bytes out of ", full_byte_upperbound)
             bitstring = HuffmanDecoder.int_to_8bitstring(byte_list[index])
-            encoded_mes_in_bits += bitstring
+            #print(bitstring)
+            encoded_mes_in_bits.append(bitstring)
+
+        encoded_mes_in_bits = "".join(encoded_mes_in_bits)
 
 
         if padded_var:
             encoded_mes_in_bits += bin(byte_list[-2])[3:]
+            #print(bin(byte_list[-2])[3:])
         # The first padded 1 bit is ignored, otherwise it disrupts the information being encrypted
 
         #print("encoded_bits_read: ", encoded_mes_in_bits)
@@ -70,18 +75,11 @@ class HuffmanDecoder:
     # Wanted: "00011111"
     def int_to_8bitstring(n):
 
-        if not (0 <= n <= 255):
-            raise Exception("Input int out of bounds : ", n)
+        eight_bitstring = bin(n)[2:]
 
-        eight_bitstring = ""
+        pad_size = 8 - len(eight_bitstring)
 
-        for bit_index in range(0,8) :
-            bit_value = 2** (7 - bit_index)
-            if n >= bit_value:
-                eight_bitstring += "1"
-                n -= bit_value
-            else:
-                eight_bitstring += "0"
+        eight_bitstring = "0"*pad_size + eight_bitstring
 
         return eight_bitstring
 
@@ -92,7 +90,7 @@ class HuffmanDecoder:
     # to decode given message (ex: "001100111010110......")
     def decode(self, encoded_message):
 
-        lobits = encoded_message
+        lobits = deque(encoded_message)
 
         # If root node contains an actual character, this means encrypted message only contains that character since no
         # node that contains character could connect to further nodes
@@ -101,38 +99,45 @@ class HuffmanDecoder:
             return self.root_node.char * len(encoded_message)
 
 
-        # Node N -> Tuple(String,N)
-        # Traversing through the Node based on the given bit_index
+        # Node -> Character
+        # Traversing through the Node based on the global lobits in the outside function decode
         # Return a tuple of current node's character and current bit_index
         # TERMINATION: When Node's char field is a Character
-        def decode_one_char(node, bit_index):
+        def decode_one_char(node):
 
-            if node.char:
-                return (node.char, bit_index)
-
-            else:
-
-                current_bit = lobits[bit_index]
-                if current_bit == "0":
-                    return decode_one_char(node.left, bit_index+1)
+            while(not node.char):
+                if lobits.popleft() == "0":
+                    node = node.left
+                    continue
                 else:
-                    return decode_one_char(node.right, bit_index+1)
+                    node = node.right
+                    continue
+
+            return node.char
+
 
         index = 0
-        decoded_message = ""
+        decoded_message = []
         index_boundary = len(encoded_message)
 
-        while (index < index_boundary):
-            print("decoding ", index, " out of ", index_boundary)
+        while (lobits):
+            #print("decoding ", index, " out of ", index_boundary)
 
-            tuple_of_sn = decode_one_char(self.root_node, index)
-            decoded_message += tuple_of_sn[0]
+            char = decode_one_char(self.root_node)
+            decoded_message.append(char)
+            #index = index_boundary - lobits.__len__()
+
             #print("decoded char: ", decoded_message)
 
-            index = tuple_of_sn[1]
             #print("index: ", index)
 
-        return decoded_message
+        return "".join(decoded_message)
+
+
+
+
+
+
 
     # String Character-> Node
     # Take in a String sequence that contains the information to
@@ -149,7 +154,7 @@ class HuffmanDecoder:
         # to traverse through the string and build a node-tree for huffman code decoding
         def generate_node_tree_accu(lochar):
 
-            current_node_char= lochar.pop(0)
+            current_node_char= lochar.popleft()
 
             if passed_most_frequent[0]:
 
@@ -180,7 +185,7 @@ class HuffmanDecoder:
             return node
 
 
-        root_node = generate_node_tree_accu(list(string))
+        root_node = generate_node_tree_accu(deque(string))
 
 
         self.root_node = root_node

@@ -2,7 +2,6 @@
 from huffmannode import Node
 
 
-
 class HuffmanEncoder:
 
     def __init__(self,message):
@@ -40,17 +39,18 @@ class HuffmanEncoder:
     # The encoded message is held in the instance variable self.encoded_message
     def encode_to_binary(self):
 
-        message_holder = ""
+        message_holder = []
 
         chars_tobe_encoded = list(self.__secretMessage)
         number_of_chars = len(chars_tobe_encoded)
 
         for index in range(0,number_of_chars):
-            print("encoding: ", index, " out of ", number_of_chars)
 
-            message_holder += self.char_to_code_dict[chars_tobe_encoded[index]]
+            #print("encoding: ", index, " out of ", number_of_chars)
+            message_holder.append(self.char_to_code_dict[chars_tobe_encoded[index]])
 
-        self.encoded_binary_message = message_holder
+
+        self.encoded_binary_message = "".join(message_holder)
 
 
     # String -> void
@@ -69,21 +69,21 @@ class HuffmanEncoder:
 
         number_of_full_bytes = num_of_bits // 8
         left_over_bits = num_of_bits % 8
-        list_of_base10_code = [None] * (number_of_full_bytes + 1)
+        list_of_base10_code = []
 
 
-        for index in range(0,num_of_bits,8):
+        for index in range(0,num_of_bits-8,8):
 
-            print("encoding: ", index, " bits out of ", num_of_bits)
+            #print("encoding: ", index, " bits out of ", num_of_bits)
             #print(index)
-            list_of_base10_code[index//8] = (int(binary_code[index:index+8],2))
+            list_of_base10_code.append(int(binary_code[index:index+8],2))
+            #print(binary_code[index:index+8])
 
         if left_over_bits > 0:
-            list_of_base10_code[-1] = int("1" + binary_code[num_of_bits - left_over_bits : ],2) # A 1 is padded at the front to prevent loss of any 0's on the left
+            list_of_base10_code.append(int("1" + binary_code[num_of_bits - left_over_bits : ],2)) # A 1 is padded at the front to prevent loss of any 0's on the left
             list_of_base10_code.append(1) # Meaning it's padded
 
         elif left_over_bits == 0:
-            list_of_base10_code.pop() # The extra None element generated for potential leftover bits is not required if there's no leftover bits
             list_of_base10_code.append(0)
         else:
             raise Exception("Leftover bit error!!! : ", left_over_bits)
