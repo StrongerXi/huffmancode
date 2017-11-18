@@ -14,6 +14,12 @@ class Node:
 
         return "Node with char " + str(self.char) + ", and frequency " + str(self.frequency)
 
+    def __lt__(self, other):
+
+        assert isinstance(other,Node)
+
+        return self.frequency < other.frequency
+
 
     # Node -> String
     # Returns the string representation of the node tree described by given root node

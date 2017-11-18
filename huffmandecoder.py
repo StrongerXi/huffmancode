@@ -35,28 +35,22 @@ class HuffmanDecoder:
 
         #print("received base 10 code", byte_list)
 
-        padded_var = byte_list[-1] == 1
+        padded_var = byte_list.pop() == 1 # 1 indicates that the last byte is padded.
+
+        lastbyte = ""
 
         if padded_var:
-            full_byte_upperbound = len( byte_list) - 2
-        else:
-            full_byte_upperbound = len( byte_list) - 1 # If all bytes are perfectly fit, only the padded_var is discarded
-
-        for index in range(0,full_byte_upperbound):
-            #print("converting ", index, " bytes out of ", full_byte_upperbound)
-            bitstring = HuffmanDecoder.int_to_8bitstring(byte_list[index])
-            #print(bitstring)
-            encoded_mes_in_bits.append(bitstring)
-
-        encoded_mes_in_bits = "".join(encoded_mes_in_bits)
+            lastbyteInt = byte_list.pop()
+            lastbyte += bin(lastbyteInt)[3:]
+            # The first padded 1 bit is ignored, otherwise it disrupts the information being encrypted
 
 
-        if padded_var:
-            encoded_mes_in_bits += bin(byte_list[-2])[3:]
-            #print(bin(byte_list[-2])[3:])
-        # The first padded 1 bit is ignored, otherwise it disrupts the information being encrypted
 
-        #print("encoded_bits_read: ", encoded_mes_in_bits)
+        # using map, convert all byteInt into 8-bit string
+        encoded_mes_in_bits = map(lambda byteInt: HuffmanDecoder.int_to_8bitstring(byteInt), byte_list)
+
+        encoded_mes_in_bits = "".join(encoded_mes_in_bits) + lastbyte
+
 
         print("decoding...")
         decoded_message = self.decode(encoded_mes_in_bits)

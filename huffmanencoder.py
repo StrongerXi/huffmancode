@@ -39,16 +39,13 @@ class HuffmanEncoder:
     # The encoded message is held in the instance variable self.encoded_message
     def encode_to_binary(self):
 
-        message_holder = []
+        #message_holder = []
 
         chars_tobe_encoded = list(self.__secretMessage)
-        number_of_chars = len(chars_tobe_encoded)
 
-        for index in range(0,number_of_chars):
+        char_to_code_dict = self.char_to_code_dict
 
-            #print("encoding: ", index, " out of ", number_of_chars)
-            message_holder.append(self.char_to_code_dict[chars_tobe_encoded[index]])
-
+        message_holder = map(lambda char:char_to_code_dict[char],chars_tobe_encoded)
 
         self.encoded_binary_message = "".join(message_holder)
 
@@ -148,7 +145,10 @@ class HuffmanEncoder:
 
         for key in fdict:
             node = Node(char=key,frequency=fdict[key])
-            HuffmanEncoder.insert_node(lon,node)
+            lon.append(node)
+
+        # Sort lon from highest to lowest frequency
+        lon.sort(reverse=True)
 
         return lon
 
@@ -156,16 +156,16 @@ class HuffmanEncoder:
     @staticmethod
     # [List-of Node] Node -> [List-of Node]
     # Insert a node into given list-of node so that
-    # the resulting lon is ordered based on Node Frequency, from lowest to highest
+    # the resulting lon is ordered based on Node Frequency, from highest to lowest
     # ASSUME: given lon is already sorted
     def insert_node(given_lon, a_node):
 
         for index in range(0,len(given_lon)):
-            if a_node.frequency <= given_lon[index].frequency:
+            if a_node.frequency > given_lon[index].frequency:
                 given_lon.insert(index,a_node)
                 return given_lon
 
-        given_lon.append(a_node) # At this point, given node must have a higher frequency than all nodes in lon
+        given_lon.append(a_node) # At this point, given node must have a lower frequency than all nodes in lon
 
         return given_lon
 
@@ -184,8 +184,8 @@ class HuffmanEncoder:
             # Left and Right node represents the nodes with
             # lowest and second lowest frequency respectively
 
-            right_node = lon.pop(0)
-            left_node  = lon.pop(0)
+            right_node = lon.pop()
+            left_node  = lon.pop()
 
             # Combine these nodes into a sub-section of one new node,
             # and insert this node back into lon for further processing
